@@ -1,0 +1,4 @@
+#gitignore
+.env
+job_offers.db
+logs/*
