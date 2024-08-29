@@ -7,6 +7,9 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import logging
+import asyncio
+import telegram
+from telegram import Bot
 
 # Configuration de la base de données SQLite
 def init_db():
@@ -47,6 +50,19 @@ def send_email(subject, body, password):
         logger_error.error(f"Echec de l'envoi de mail: {str(e)}")
         print(f"Echec de l'envoi de mail: {str(e)}")
 
+def envoyer_message_telegram(bot_token, chat_id, message):
+    try:
+        bot = telegram.Bot(token=bot_token)
+        bot = Bot(token = bot_token)
+        asyncio.run(bot.send_message(chat_id=chat_id, text=message))
+        logger_info.info(f"Message '{message}' eenvoyé avec succès.")
+        print(f"Message '{message}' envoyé avec succès.")
+    except telegram.error.TelegramError as e:
+        print(f"Une erreur s'est produite avec Telegram: {e}")
+    except Exception as e:
+        logger_error.error(f"Echec de l'envoi du message Telegram: {str(e)}")
+        print(f"Une autre erreur s'est produite: {e}")
+
 def fetchOffer(url):
 # URL de la page que vous souhaitez scraper
 
@@ -79,6 +95,7 @@ def fetchOffer(url):
                 subject = "Nouvelle offre d'emploi : " + title
                 body = f"Une nouvelle offre d'emploi a été trouvée :\n\nTitre: {title}\nLien: {link}"
                 send_email(subject, body, app_mail_password)
+                envoyer_message_telegram(BOT_TOKEN, CHAT_ID, body)
                 #send_whatsApp(body)
                 # Si l'offre n'existe pas, l'ajouter à la base de données
                 cursor.execute("INSERT INTO offers (title, link) VALUES (?, ?)", (title, link))
@@ -135,4 +152,6 @@ if __name__ == "__main__":
     # Récupérer le mot de passe 
     load_dotenv()
     app_mail_password = os.getenv('APP_MAIL_PASSWORD')
+    BOT_TOKEN = '7260561384:AAGtt4oUHOnjox1mn7rNcDu9rupc1azWjfw'
+    CHAT_ID = '1127653878'  # ID de la conversation (peut être trouvé via @userinfobot)
     main()
