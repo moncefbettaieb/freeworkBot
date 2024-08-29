@@ -152,6 +152,7 @@ if __name__ == "__main__":
     # Récupérer le mot de passe 
     load_dotenv()
     app_mail_password = os.getenv('APP_MAIL_PASSWORD')
-    BOT_TOKEN = '7260561384:AAGtt4oUHOnjox1mn7rNcDu9rupc1azWjfw'
+    BOT_TOKEN = os.getenv('BOT_TOKEN')
+    print(BOT_TOKEN)
     CHAT_ID = '1127653878'  # ID de la conversation (peut être trouvé via @userinfobot)
     main()
