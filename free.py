@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
@@ -144,10 +145,13 @@ def main():
     "https://www.free-work.com/fr/tech-it/jobs?query=spark&contracts=contractor&sort=date",
     "https://www.free-work.com/fr/tech-it/jobs?query=snowflake&contracts=contractor&sort=date"
 ]
-
+    heure_actuelle = datetime.now()
+    heure_formatee = heure_actuelle.strftime("%H")
     # Parcourir le tableau d'URLs
     for url in urls:
         fetchOffer(url)
+    end = f"Le traitement de l'heure {heure_formatee} est terminé."
+    envoyer_message_telegram(BOT_TOKEN, CHAT_ID, end)
 
 if __name__ == "__main__":
     # Récupérer le mot de passe 
