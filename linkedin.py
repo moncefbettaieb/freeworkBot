@@ -14,7 +14,7 @@ from telegram import Bot
 
 # Configuration de la base de données SQLite
 def init_db():
-    conn = sqlite3.connect('job_offers.db')
+    conn = sqlite3.connect('job_offers_linkedin.db')
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS offers (
@@ -25,9 +25,6 @@ def init_db():
     ''')
     conn.commit()
     return conn
-
-# Fonction pour envoyer un email
-def send_email(subject, body, password):
     sender_email = "moncefbettaieb@gmail.com"
     receiver_email = "mbettaieb@gcdconsulting.fr"
 
@@ -71,20 +68,25 @@ def fetchOffer(url):
     cursor = conn.cursor()
 
     # Faire une requête GET pour récupérer le contenu de la page
-    response = requests.get(url)
-
+    response = requests.get(url, headers = {'User-agent': 'your bot 3.1'})
+    print(response)
     # Vérifier si la requête a été réussie
     if response.status_code == 200:
         # Parser le contenu de la page avec BeautifulSoup
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Trouver tous les éléments qui correspondent aux titres des offres
-        job_titles = soup.find_all('a', class_='after:absolute after:inset-0')
-
+        job_titles = soup.find_all('a', class_='base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2]')
+        print(soup)
+        print(job_titles)
         # Traiter chaque offre
         for job in job_titles:
             title = job.get_text(strip=True)
-            link = "https://www.free-work.com" + job['href']
+            
+            link = job['href']
+            print(job)
+            print(title)
+            print(link)
 
             # Vérifier si l'offre existe déjà dans la base de données
             cursor.execute("SELECT * FROM offers WHERE link=?", (link,))
@@ -143,18 +145,14 @@ CHAT_ID = os.getenv('CHAT_ID')
 
 def main():
     urls = [
-    "https://www.free-work.com/fr/tech-it/jobs?query=data%20engineer&contracts=contractor&sort=date",
-    "https://www.free-work.com/fr/tech-it/jobs?query=gcp&contracts=contractor&sort=date",
-    "https://www.free-work.com/fr/tech-it/jobs?query=Data%20engineer&remote=full&sort=date",
-    "https://www.free-work.com/fr/tech-it/jobs?query=spark&contracts=contractor&sort=date",
-    "https://www.free-work.com/fr/tech-it/jobs?query=snowflake&contracts=contractor&sort=date"
+    "https://www.linkedin.com/jobs/search?keywords=Data%20Engineer%20Freelance&location=France&geoId=105015875&f_TPR=&f_JT=C&position=1&pageNum=0"
 ]
     heure_actuelle = datetime.now()
-    heure_formatee = heure_actuelle.strftime("%H")
+    heure_formatee = heure_actuelle.strftime("%H%M")
     # Parcourir le tableau d'URLs
     for url in urls:
         fetchOffer(url)
-    end = f"Le traitement de l'heure {heure_formatee} est terminé."
+    end = f"La recherche Linkedin de l'heure {heure_formatee} est terminé."
     envoyer_message_telegram(BOT_TOKEN, CHAT_ID, end)
 
 if __name__ == "__main__":
